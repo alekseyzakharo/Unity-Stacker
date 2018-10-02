@@ -9,14 +9,14 @@ public class MainScript : MonoBehaviour {
     public GameObject newBlock;
     public GameObject oldBlock;
 
-    bool isRight;
+    string direction;
 
     Vector3 leftVec = new Vector3(-15, 0, 0);
     Vector3 rightVec = new Vector3(0, 0, -15);
 
     // Use this for initialization
     void Start () {
-        isRight = true;
+        direction = "right";
         oldBlock.SendMessage("Stop");
         //spawn intial block
         spawnBlock();
@@ -32,17 +32,17 @@ public class MainScript : MonoBehaviour {
     void spawnBlock()
     {
         Vector3 blockVec = leftVec;
-        if (isRight)
+        if (direction == "right")
             blockVec = rightVec;
         newBlock = Instantiate(prefabBlock, blockVec, Quaternion.identity);
-        newBlock.SendMessage("Direction", isRight);
+        newBlock.SendMessage("Direction", direction);
 
         newBlock.transform.parent = GameObject.Find("Stacks").transform;
 
-        if (isRight)
-            isRight = false;
+        if (direction == "right")
+            direction = "left";
         else
-            isRight = true;
+            direction = "right";
     }
 
     void translateBlocksDown()

@@ -6,7 +6,7 @@ public class Block : MonoBehaviour {
 
     public float speed = 5.0f;
 
-    enum dir {Left, Right };
+    enum dir {Left, Right, Down };
 
     private bool STOP = false;
     private dir direction;
@@ -25,19 +25,25 @@ public class Block : MonoBehaviour {
             {
                 transform.Translate(new Vector3(0,0,speed*Time.deltaTime));
             }
-            else
+            else if(direction == dir.Left)
             {
                 transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
+            }
+            else
+            {
+                transform.Translate(new Vector3(0,speed * Time.deltaTime, 0));
             }
         }
 	}
 
-    void Direction(bool isRight)
+    void Direction(string blockDirection)
     {
-        if(isRight)
+        if (blockDirection == "right")
             direction = dir.Right;
-        else
+        else if (blockDirection == "left")
             direction = dir.Left;
+        else
+            direction = dir.Down;
     }
 
     void Size(int width, int depth)
