@@ -6,7 +6,7 @@ public class Block : MonoBehaviour {
 
     public float speed = 5.0f;
 
-    enum dir {Left, Right, Down };
+    enum dir {Left, Right, Down, Up };
 
     private bool STOP = false;
     private dir direction;
@@ -30,12 +30,28 @@ public class Block : MonoBehaviour {
             {
                 transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
             }
-            else
+            else if(direction == dir.Down)
             {
                 transform.Translate(new Vector3(0,-speed * Time.deltaTime, 0));
             }
+            else
+            {
+                transform.Translate(new Vector3(0, speed * Time.deltaTime, 0));
+            }
         }
 	}
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        string name = collision.gameObject.name;
+        if (name == "floor" || name == "ceiling")
+            Destroy(gameObject);
+        if (name == "right" || name == "left")
+        {
+            //Game Over***********
+            Direction("down");
+        }
+    }
 
     void Direction(string blockDirection)
     {
@@ -43,8 +59,10 @@ public class Block : MonoBehaviour {
             direction = dir.Right;
         else if (blockDirection == "left")
             direction = dir.Left;
-        else
+        else if (blockDirection == "Down")
             direction = dir.Down;
+        else
+            direction = dir.Up;
     }
 
     //function that stops this object from transforming

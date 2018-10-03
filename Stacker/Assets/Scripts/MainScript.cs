@@ -62,13 +62,9 @@ public class MainScript : MonoBehaviour {
     {
         Vector3 vec = blockPositionCenter(xMax, xMin, zMax, zMin);
         if (direction == "left")
-        {
             vec.x = spawnPoint;
-        }
         else
-        {
             vec.z = spawnPoint;
-        }
         return vec;
     }
 
@@ -143,8 +139,8 @@ public class MainScript : MonoBehaviour {
 
         GameObject extra = Instantiate(prefabBlock, blockBPos, Quaternion.identity);
         extra.transform.localScale = blockBSca;
-        extra.SendMessage("Direction", "Down");
-        extra.transform.parent = GameObject.Find("Stacks").transform;
+        extra.SendMessage("Direction", "Up");
+        extra.transform.parent = GameObject.Find("FallingPieces").transform;
 
         oldBlock = newBlock;
     }
