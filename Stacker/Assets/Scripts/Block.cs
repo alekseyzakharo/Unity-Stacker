@@ -13,6 +13,7 @@ public class Block : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        
 	}
 	
 	// Update is called once per frame
@@ -31,7 +32,7 @@ public class Block : MonoBehaviour {
             }
             else
             {
-                transform.Translate(new Vector3(0,speed * Time.deltaTime, 0));
+                transform.Translate(new Vector3(0,-speed * Time.deltaTime, 0));
             }
         }
 	}
@@ -46,15 +47,15 @@ public class Block : MonoBehaviour {
             direction = dir.Down;
     }
 
-    void Size(int width, int depth)
-    {
-
-    }
-
     //function that stops this object from transforming
     void Stop()
     {
         STOP = true;
+    }
+
+    void Go()
+    {
+        STOP = false;
     }
 
 }
