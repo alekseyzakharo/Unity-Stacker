@@ -5,31 +5,33 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MainScript : MonoBehaviour {
-
+    public Text scoreText;
     public GameObject prefabBlock;
 
-    public GameObject newBlock;
-    public GameObject oldBlock;
+    public float tolerance = 0.01f;
 
-    string direction;
-
-    private float tolerance = 0.01f;
+    private GameObject newBlock;
+    private GameObject oldBlock;
+    private string direction;
 
     private float xMin = -2.0f;
     private float xMax = 2.0f;
-
     private float zMin = -2.0f;
     private float zMax = 2.0f;
 
     private float spawnPoint = -15.0f;
 
+    private float score = 0;
+
     // Use this for initialization
     void Start () {
+        oldBlock = GameObject.Find("InitialBlock");
+        scoreText.text = score.ToString();
         direction = "right";
         oldBlock.SendMessage("Stop");
         //spawn intial block
         spawnBlock();
-        //newBlock.SendMessage("Stop");
+        
 
     }
 	
@@ -39,9 +41,11 @@ public class MainScript : MonoBehaviour {
         {
             newBlock.SendMessage("Stop");
             checkPosition();
+            scoreText.text = (score+=100).ToString();
             oldBlock = newBlock;
             translateBlocksDown();
             spawnBlock();
+
         }
     }
 
