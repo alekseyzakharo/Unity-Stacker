@@ -735,8 +735,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68d725a85c5a9d1469515985ea5ccf59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoreText: {fileID: 165874332}
   prefabBlock: {fileID: 1508517000298556, guid: 24c69351e66b1ff4e9320a0550cd4643,
     type: 2}
+  tolerance: 0.01
 --- !u!4 &966984565 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4315280862756232, guid: 24c69351e66b1ff4e9320a0550cd4643,

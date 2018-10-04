@@ -6,14 +6,22 @@ using UnityEngine.UI;
 
 public class MainScript : MonoBehaviour {
     public Text scoreText;
+    public Text tol;
     public GameObject prefabBlock;
 
-    public float tolerance = 0.01f;
-
+    //block
+    public float tolerance = 0.2f;
     private GameObject newBlock;
     private GameObject oldBlock;
     private string direction;
 
+    //color
+    private Color color;
+    private float r = 20;
+    private float g = 20;
+    private float b = 20;
+
+    //block position 
     private float xMin = -2.0f;
     private float xMax = 2.0f;
     private float zMin = -2.0f;
@@ -25,11 +33,16 @@ public class MainScript : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        color = new Color(0, 0, 0);
         oldBlock = GameObject.Find("InitialBlock");
+        oldBlock.GetComponent<Renderer>().material.color = color;
         scoreText.text = score.ToString();
+
+
         direction = "right";
         oldBlock.SendMessage("Stop");
         //spawn intial block
+        updateColor();
         spawnBlock();
         
 
@@ -44,6 +57,7 @@ public class MainScript : MonoBehaviour {
             scoreText.text = (score+=100).ToString();
             oldBlock = newBlock;
             translateBlocksDown();
+            updateColor();
             spawnBlock();
 
         }
@@ -84,11 +98,6 @@ public class MainScript : MonoBehaviour {
 
     private void checkPosition()
     {
-        Vector3 blockAPos;
-        Vector3 blockASca;
-        Vector3 blockBPos = new Vector3(1, 1, 1);
-        Vector3 blockBSca = new Vector3(1, 1, 1);
-
         float newBlock_xMax = newBlock.transform.position.x + (newBlock.transform.localScale.x / 2);
         float newBlock_xMin = newBlock.transform.position.x - (newBlock.transform.localScale.x / 2);
         float newBlock_zMax = newBlock.transform.position.z + (newBlock.transform.localScale.z / 2);
@@ -110,11 +119,14 @@ public class MainScript : MonoBehaviour {
         }
         else
         {
+            Vector3 blockBPos = new Vector3(1, 1, 1);
+            Vector3 blockBSca = new Vector3(1, 1, 1);
+
             //logic for figuring out falling block position/scale
             fallingBlockPositionScale(newBlock_xMax, newBlock_xMin, newBlock_zMax, newBlock_zMin, ref blockBPos, ref blockBSca);
 
-            blockAPos = blockPositionCenter(xMax, xMin, zMax, zMin);
-            blockASca = blockScale(xMax, xMin, zMax, zMin);
+            Vector3 blockAPos = blockPositionCenter(xMax, xMin, zMax, zMin);
+            Vector3 blockASca = blockScale(xMax, xMin, zMax, zMin);
 
             Destroy(newBlock);
             newBlock = instantiateBlock(blockAPos, blockASca, direction, false, GameObject.Find("Stacks").transform);
@@ -155,6 +167,7 @@ public class MainScript : MonoBehaviour {
     {
         GameObject obj = Instantiate(prefabBlock, position, Quaternion.identity);
         obj.transform.localScale = scale;
+        obj.GetComponent<Renderer>().material.color = color;
         if (go)
             obj.SendMessage("Go");
         else
@@ -171,11 +184,14 @@ public class MainScript : MonoBehaviour {
         float oz = oldBlock.transform.position.z;
         float nx = newBlock.transform.position.x;
         float nz = newBlock.transform.position.z;
-        if (Math.Abs((ox - nx) + (oz - nz)) > tolerance)
+
+        tol.text = Math.Abs((ox - nx) + (oz - nz)).ToString();
+
+        if (Math.Abs((ox - nx) + (oz - nz)) < tolerance)
         {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     private void translateBlocksDown()
@@ -184,6 +200,31 @@ public class MainScript : MonoBehaviour {
         foreach(Transform child in stacks)
         {
             child.transform.Translate(new Vector3(0, -1, 0));
+        }
+    }
+
+    private void updateColor()
+    {
+        if(color.r < 1)
+        {
+            if ((color.r + (r / 255)) > 1)
+                color.r = 1;
+            else
+                color.r += (r / 255);
+        }
+        else if(color.g < 1)
+        {
+            if ((color.g + (g / 255)) > 1)
+                color.g = 1;
+            else
+                color.g += (g / 255);
+        }
+        else if (color.b < 1)
+        {
+            if ((color.b + (b / 255)) > 1)
+                color.b = 1;
+            else
+                color.b += (b / 255);
         }
     }
 
