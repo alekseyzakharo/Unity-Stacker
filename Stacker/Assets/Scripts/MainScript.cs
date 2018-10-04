@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainScript : MonoBehaviour {
 
@@ -10,6 +12,8 @@ public class MainScript : MonoBehaviour {
     public GameObject oldBlock;
 
     string direction;
+
+    private float tolerance = 0.01f;
 
     private float xMin = -2.0f;
     private float xMax = 2.0f;
@@ -35,6 +39,7 @@ public class MainScript : MonoBehaviour {
         {
             newBlock.SendMessage("Stop");
             checkPosition();
+            oldBlock = newBlock;
             translateBlocksDown();
             spawnBlock();
         }
@@ -42,16 +47,7 @@ public class MainScript : MonoBehaviour {
 
     private void spawnBlock()
     {
-        //get the block position
-        Vector3 blockVec = blockPosition(direction);
-
-        newBlock = Instantiate(prefabBlock, blockVec, Quaternion.identity);
-        newBlock.transform.localScale = blockScale(xMax,xMin,zMax,zMin);
-        newBlock.SendMessage("Direction", direction);
-        newBlock.SendMessage("Go");
-
-        newBlock.transform.parent = GameObject.Find("Stacks").transform;
-
+        newBlock = instantiateBlock(blockPosition(direction), blockScale(xMax, xMin, zMax, zMin), direction, true, GameObject.Find("Stacks").transform);
         if (direction == "right")
             direction = "left";
         else
@@ -100,52 +96,85 @@ public class MainScript : MonoBehaviour {
             newBlock.SendMessage("Direction", "Down");
             newBlock.SendMessage("Go");
 
-            //GAME OVER *************
+            //********************GAME OVER *************
             return;
         }
-
-        if (newBlock_xMax < xMax && newBlock_xMax > xMin)
+        //at this point we know that the block did not miss so check againts tolerance to see if user should get perfect position
+        if(compareOldBlockNewBlockTolerance())
         {
-            xMax = newBlock_xMax;
-            blockBPos = blockPositionCenter(xMin, newBlock_xMin, zMax, zMin);
-            blockBSca = blockScale(xMin, newBlock_xMin, zMax, zMin);
+            newBlock.transform.position = new Vector3(oldBlock.transform.position.x, oldBlock.transform.position.y+1, oldBlock.transform.position.z);
         }
-        else if(newBlock_xMin < xMax && newBlock_xMin > xMin)
+        else
         {
-            xMin = newBlock_xMin;
-            blockBPos = blockPositionCenter(newBlock_xMax, xMax, zMax, zMin);
-            blockBSca = blockScale(newBlock_xMax, xMax, zMax, zMin);
-        }
-        if (newBlock_zMax < zMax && newBlock_zMax > zMin)
-        {
-            zMax = newBlock_zMax;
-            blockBPos = blockPositionCenter(xMax, xMin, zMin, newBlock_zMin);
-            blockBSca = blockScale(xMax, xMin, zMin, newBlock_zMin);
-        }
-        else if (newBlock_zMin < zMax && newBlock_zMin > zMin)
-        {
-            zMin = newBlock_zMin;
-            blockBPos = blockPositionCenter(xMax, xMin, newBlock_zMax, zMax);
-            blockBSca = blockScale(xMax, xMin, newBlock_zMax, zMax);
-        }
-        blockAPos = blockPositionCenter(xMax, xMin, zMax, zMin);
-        blockASca = blockScale(xMax, xMin, zMax, zMin);
+            //logic for figuring out falling block position/scale
+            fallingBlockPositionScale(newBlock_xMax, newBlock_xMin, newBlock_zMax, newBlock_zMin, ref blockBPos, ref blockBSca);
 
-        Destroy(newBlock);
-        newBlock = Instantiate(prefabBlock, blockAPos, Quaternion.identity);
-        newBlock.transform.localScale = blockASca;
-        newBlock.SendMessage("Stop");
-        newBlock.transform.parent = GameObject.Find("Stacks").transform;
+            blockAPos = blockPositionCenter(xMax, xMin, zMax, zMin);
+            blockASca = blockScale(xMax, xMin, zMax, zMin);
 
-        GameObject extra = Instantiate(prefabBlock, blockBPos, Quaternion.identity);
-        extra.transform.localScale = blockBSca;
-        extra.SendMessage("Direction", "Up");
-        extra.transform.parent = GameObject.Find("FallingPieces").transform;
+            Destroy(newBlock);
+            newBlock = instantiateBlock(blockAPos, blockASca, direction, false, GameObject.Find("Stacks").transform);
 
-        oldBlock = newBlock;
+            instantiateBlock(blockBPos, blockBSca, "Up", true, GameObject.Find("FallingPieces").transform);
+        }
     }
 
-    void translateBlocksDown()
+    private void fallingBlockPositionScale(float new_Xmax, float new_Xmin, float new_Zmax, float new_Zmin, ref Vector3 blockPos, ref Vector3 blockSca)
+    {
+        if (new_Xmax < xMax && new_Xmax > xMin)
+        {
+            xMax = new_Xmax;
+            blockPos = blockPositionCenter(xMin, new_Xmin, zMax, zMin);
+            blockSca = blockScale(xMin, new_Xmin, zMax, zMin);
+        }
+        else if (new_Xmin < xMax && new_Xmin > xMin)
+        {
+            xMin = new_Xmin;
+            blockPos = blockPositionCenter(new_Xmax, xMax, zMax, zMin);
+            blockSca = blockScale(new_Xmax, xMax, zMax, zMin);
+        }
+        if (new_Zmax < zMax && new_Zmax > zMin)
+        {
+            zMax = new_Zmax;
+            blockPos = blockPositionCenter(xMax, xMin, zMin, new_Zmin);
+            blockSca = blockScale(xMax, xMin, zMin, new_Zmin);
+        }
+        else if (new_Zmin < zMax && new_Zmin > zMin)
+        {
+            zMin = new_Zmin;
+            blockPos = blockPositionCenter(xMax, xMin, new_Zmax, zMax);
+            blockSca = blockScale(xMax, xMin, new_Zmax, zMax);
+        }
+    }
+
+    private GameObject instantiateBlock(Vector3 position, Vector3 scale, string direction, bool go, Transform parent)
+    {
+        GameObject obj = Instantiate(prefabBlock, position, Quaternion.identity);
+        obj.transform.localScale = scale;
+        if (go)
+            obj.SendMessage("Go");
+        else
+            obj.SendMessage("Stop");
+        obj.SendMessage("Direction", direction);
+        obj.transform.parent = parent;
+        return obj;
+    }
+
+    //if tolerance is greater than allowed 
+    private bool compareOldBlockNewBlockTolerance()
+    {
+        float ox = oldBlock.transform.position.x;
+        float oz = oldBlock.transform.position.z;
+        float nx = newBlock.transform.position.x;
+        float nz = newBlock.transform.position.z;
+        if (Math.Abs((ox - nx) + (oz - nz)) > tolerance)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private void translateBlocksDown()
     {
         Transform stacks = GameObject.Find("Stacks").GetComponentInChildren<Transform>();
         foreach(Transform child in stacks)
