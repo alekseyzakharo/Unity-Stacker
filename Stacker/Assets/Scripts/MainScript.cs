@@ -50,6 +50,7 @@ public class MainScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
         if (Input.GetMouseButtonDown(0))
         {
             newBlock.SendMessage("Stop");
@@ -185,7 +186,7 @@ public class MainScript : MonoBehaviour {
         float nx = newBlock.transform.position.x;
         float nz = newBlock.transform.position.z;
 
-        tol.text = Math.Abs((ox - nx) + (oz - nz)).ToString();
+        tol.text = Math.Abs((ox - nx) + (oz - nz)).ToString() + " : " + tolerance.ToString() ;
 
         if (Math.Abs((ox - nx) + (oz - nz)) < tolerance)
         {
@@ -227,5 +228,4 @@ public class MainScript : MonoBehaviour {
                 color.b += (b / 255);
         }
     }
-
 }
