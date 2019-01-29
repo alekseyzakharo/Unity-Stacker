@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainScript : MonoBehaviour {
     public Text scoreText;
-    public Text tol;
     public GameObject prefabBlock;
+    public GameObject gameOver;
 
     //block
     public float tolerance = 0.2f;
@@ -110,6 +111,7 @@ public class MainScript : MonoBehaviour {
             newBlock.SendMessage("Direction", "Down");
             newBlock.SendMessage("Go");
 
+            GameOver();
             //********************GAME OVER *************
             return;
         }
@@ -186,8 +188,6 @@ public class MainScript : MonoBehaviour {
         float nx = newBlock.transform.position.x;
         float nz = newBlock.transform.position.z;
 
-        tol.text = Math.Abs((ox - nx) + (oz - nz)).ToString() + " : " + tolerance.ToString() ;
-
         if (Math.Abs((ox - nx) + (oz - nz)) < tolerance)
         {
             return true;
@@ -227,5 +227,19 @@ public class MainScript : MonoBehaviour {
             else
                 color.b += (b / 255);
         }
+    }
+
+    public void GameOver()
+    {
+        //freeze game
+        Time.timeScale = 0;
+        gameOver.SetActive(true);
+    }
+
+    public void RestartGame()
+    {
+        //unfreeze game
+        Time.timeScale = 1;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

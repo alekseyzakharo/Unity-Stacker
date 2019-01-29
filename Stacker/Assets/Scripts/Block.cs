@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Block : MonoBehaviour {
 
+    private MainScript main;
+
     public float speed = 5.0f;
 
     enum dir {Left, Right, Down, Up };
@@ -13,7 +15,7 @@ public class Block : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        
+        main = GameObject.Find("Main Camera").GetComponent<MainScript>();
 	}
 	
 	// Update is called once per frame
@@ -48,7 +50,7 @@ public class Block : MonoBehaviour {
             Destroy(gameObject);
         if (name == "right" || name == "left")
         {
-            //Game Over***********
+            main.GameOver();
             Direction("down");
         }
     }
